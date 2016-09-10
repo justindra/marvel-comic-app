@@ -19,7 +19,15 @@
 
   <script>
     Polymer({
-      is: 'my-home'
+      is: 'my-home',
+      created: function () {
+        MarvelStore.actions.getNewComics();
+      },
+      properties: {
+        comics: {
+          type: Object
+        }
+      }
     });
   </script>
 </dom-module>

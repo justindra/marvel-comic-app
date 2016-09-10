@@ -92,7 +92,7 @@
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <my-home name="home"></my-home>
+          <my-home name="home" comics="[[comics]]"></my-home>
           <my-comics name="comics" posts="[[posts]]"></my-comics>
           <my-characters name="characters"></my-characters>
           <my-series name="series"></my-series>
@@ -109,14 +109,14 @@
       is: 'main-app',
       behavior: [ ReduxBehavior ],
       properties: {
-        prop1: {
-          type: String,
-          value: 'main-app',
-        },
         page: {
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
+        },
+        comics: {
+          type: Object,
+          statePath: 'curComics'
         }
       },
 
