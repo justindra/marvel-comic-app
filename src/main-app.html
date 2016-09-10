@@ -16,6 +16,12 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="my-icons.html">
 
+<!-- REDUX -->
+<script src="../node_modules/redux/dist/redux.js"></script>
+<script src="../node_modules/redux-thunk/dist/redux-thunk.js"></script>
+<link rel="import" href="../bower_components/polymer-redux/polymer-redux.html">
+<script src="./redux-store.js"></script>
+
 <dom-module id="main-app">
   <template>
     <style>
@@ -97,10 +103,11 @@
   </template>
 
   <script>
+    var MarvelStore = buildStore();
+    var ReduxBehavior = PolymerRedux(MarvelStore);
     Polymer({
-
       is: 'main-app',
-
+      behavior: [ ReduxBehavior ],
       properties: {
         prop1: {
           type: String,
