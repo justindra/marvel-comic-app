@@ -15,14 +15,17 @@ function  buildStore() {
     function receiveComics (json) {
         return {
             type: RECEIVE_COMICS,
-            data: json.data.results
+            data: json.data.results,
+            offset: json.data.offset,
+            total: json.data.total,
+            count: json.data.count
         };
     }
 
-    function fetchNewComics() {
+    function fetchNewComics(offset) {
       return function (dispatch) {
         dispatch(requestComics());
-        return fetch(`http://gateway.marvel.com:80/v1/public/comics?dateDescriptor=thisMonth&orderBy=-onsaleDate&apikey=` + API_KEY)
+        return fetch(`http://gateway.marvel.com:80/v1/public/comics?dateDescriptor=thisMonth&orderBy=-onsaleDate&&offset=` + (offset || 0) + `&apikey=` + API_KEY)
           .then(function (response) { return response.json(); })
           .then(function (json) { return dispatch(receiveComics(json)); });
       };
@@ -35,10 +38,16 @@ function  buildStore() {
                     loading: true
                 });
             case RECEIVE_COMICS:
+                var more = (action.offset + action.count) < action.total;
+                var items = action.data
+                if (action.offset > 0) {
+                    items = [].concat(state.items, action.data);
+                }
                 return Object.assign({}, state, {
                     loading: false,
-                    items: action.data
-
+                    items: items,
+                    more: more,
+                    count: (action.offset + action.count)
                 });
             default:
                 return state || { loading: false, items: [] };
@@ -59,8 +68,8 @@ function  buildStore() {
 
     MarvelStore.actions = {};
 
-    MarvelStore.actions.getNewComics = function () {
-        MarvelStore.dispatch(fetchNewComics());
+    MarvelStore.actions.getNewComics = function (offset) {
+        MarvelStore.dispatch(fetchNewComics(offset));
     }
 
     return MarvelStore;

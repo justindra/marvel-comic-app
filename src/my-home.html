@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <link rel="import" href="./loader.html">
 
@@ -29,13 +30,24 @@
         text-align: center;
       }
 
+      .button {
+        display: block;
+        text-align: center;
+      }
+
+      .button paper-button {
+        background: #f0141e;
+        color: white;
+      }
+
+      .button paper-button:hover {
+        background: #d41018;
+      }
+
     </style>
 
     
     <h2>Latest Comics</h2>
-    <template is="dom-if" if="{{comics.loading}}">
-      <my-loader></my-loader>
-    </template>
     <div class="comic-list-container">
       <template is="dom-repeat" items="{{comics.items}}">
         <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
@@ -43,8 +55,14 @@
         </paper-card>
       </template>
     </div>
-
-    <p>View more button</p>
+    <template is="dom-if" if="{{comics.loading}}">
+      <my-loader></my-loader>
+    </template>
+    <div class="button">
+      <template is="dom-if" if="{{comics.more}}">
+        <paper-button on-tap="getMoreComics" raised>LOAD MORE</paper-button>
+      </template>
+    </div>
   </template>
 
   <script>
@@ -52,6 +70,7 @@
       is: 'my-home',
       behaviors: [ ReduxBehavior ],
       created: function () {
+        this.offset = 0;
         MarvelStore.actions.getNewComics();
       },
       properties: {
@@ -59,6 +78,10 @@
           type: Object,
           statePath: 'curComics'
         }
+      },
+      getMoreComics: function () {
+        this.offset += 20;
+        MarvelStore.actions.getNewComics(this.offset);
       }
     });
   </script>
