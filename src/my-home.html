@@ -1,4 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
 
 <dom-module id="my-home">
   <template>
@@ -7,25 +8,52 @@
         display: block;
 
         padding: 1em;
+        --paper-card-header-image: {
+          height: 460px;
+        }
       }
+
+      paper-card {
+        width: 300px;
+        margin: 15px;
+      }
+
+      paper-card .card-content {
+        height: 2em;
+        overflow: hidden;
+      }
+
+      .comic-list-container {
+        text-align: center;
+      }
+
     </style>
 
     
     <h2>Latest Comics</h2>
 
-    <p>List of comics here</p>
+    <div class="comic-list-container">
+      <template is="dom-repeat" items="{{comics.items}}">
+        <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
+          <div class="card-content">{{item.title}}</div>
+        </paper-card>
+      </template>
+    </div>
+
     <p>View more button</p>
   </template>
 
   <script>
     Polymer({
       is: 'my-home',
+      behaviors: [ ReduxBehavior ],
       created: function () {
         MarvelStore.actions.getNewComics();
       },
       properties: {
         comics: {
-          type: Object
+          type: Object,
+          statePath: 'curComics'
         }
       }
     });

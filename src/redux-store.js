@@ -22,7 +22,7 @@ function  buildStore() {
     function fetchNewComics() {
       return function (dispatch) {
         dispatch(requestComics());
-        return fetch(`http://gateway.marvel.com:80/v1/public/comics?dateDescriptor=thisMonth&apikey=` + API_KEY)
+        return fetch(`http://gateway.marvel.com:80/v1/public/comics?dateDescriptor=thisMonth&orderBy=-onsaleDate&apikey=` + API_KEY)
           .then(function (response) { return response.json(); })
           .then(function (json) { return dispatch(receiveComics(json)); });
       };
