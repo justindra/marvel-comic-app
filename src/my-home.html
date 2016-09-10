@@ -1,6 +1,8 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-card/paper-card.html">
 
+<link rel="import" href="./loader.html">
+
 <dom-module id="my-home">
   <template>
     <style>
@@ -31,7 +33,9 @@
 
     
     <h2>Latest Comics</h2>
-
+    <template is="dom-if" if="{{comics.loading}}">
+      <my-loader></my-loader>
+    </template>
     <div class="comic-list-container">
       <template is="dom-repeat" items="{{comics.items}}">
         <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
