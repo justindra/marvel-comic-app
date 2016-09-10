@@ -126,6 +126,14 @@
 
       _routePageChanged: function(page) {
         this.page = page || 'home';
+        switch (this.page) {
+          case 'home':
+            MarvelStore.actions.getComics(0, undefined, true);
+            break;
+          case 'comics':
+            MarvelStore.actions.getComics();
+            break;
+        }
       },
 
       _pageChanged: function(page) {

@@ -1,0 +1,82 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="./loader.html">
+
+<dom-module id="my-comic-list">
+  <template>
+    <style>
+      :host {
+        display: block;
+
+        padding: 1em;
+        --paper-card-header-image: {
+          height: 460px;
+        }
+      }
+
+      paper-card {
+        width: 300px;
+        margin: 15px;
+      }
+
+      paper-card .card-content {
+        height: 2em;
+        overflow: hidden;
+      }
+
+      .comic-list-container {
+        text-align: center;
+      }
+
+      .button {
+        display: block;
+        text-align: center;
+      }
+
+      .button paper-button {
+        background: #f0141e;
+        color: white;
+      }
+
+      .button paper-button:hover {
+        background: #d41018;
+      }
+
+    </style>
+
+    
+    <div class="comic-list-container">
+      <template is="dom-repeat" items="{{comics.items}}">
+        <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
+          <div class="card-content">{{item.title}}</div>
+        </paper-card>
+      </template>
+    </div>
+    <template is="dom-if" if="{{comics.loading}}">
+      <my-loader></my-loader>
+    </template>
+    <div class="button">
+      <template is="dom-if" if="{{comics.more}}">
+        <paper-button on-tap="getMoreComics" raised>LOAD MORE</paper-button>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-comic-list',
+      behaviors: [ ReduxBehavior ],
+      properties: {
+        comics: {
+          type: Object,
+          statePath: 'curComics'
+        }
+      },
+      getMoreComics: function () {
+        MarvelStore.actions.getComics(this.comics.count, this.comics.format, this.comics.newComics);
+      }
+    });
+  </script>
+</dom-module>

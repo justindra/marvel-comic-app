@@ -6,9 +6,12 @@ function  buildStore() {
     var REQUEST_COMICS = 'REQUEST_COMICS';
     var RECEIVE_COMICS = 'RECEIVE_COMICS';
 
-    function requestComics () {
+    function requestComics (offset, format, newComics) {
         return {
-            type: REQUEST_COMICS
+            type: REQUEST_COMICS,
+            offset: offset || 0,
+            format: format || '',
+            newComics: newComics || false
         };
     }
 
@@ -22,10 +25,14 @@ function  buildStore() {
         };
     }
 
-    function fetchNewComics(offset) {
+    function fetchComics(offset, format, newComics) {
       return function (dispatch) {
-        dispatch(requestComics());
-        return fetch(`http://gateway.marvel.com:80/v1/public/comics?dateDescriptor=thisMonth&orderBy=-onsaleDate&&offset=` + (offset || 0) + `&apikey=` + API_KEY)
+        dispatch(requestComics(offset, format, newComics));
+        return fetch(`http://gateway.marvel.com:80/v1/public/comics?` +
+            (format && (`format=` + (format || '')) || '') +
+            `&offset=` + (offset || 0) + 
+            (newComics && `&dateDescriptor=thisMonth` || '') +
+            `&apikey=` + API_KEY)
           .then(function (response) { return response.json(); })
           .then(function (json) { return dispatch(receiveComics(json)); });
       };
@@ -34,8 +41,15 @@ function  buildStore() {
     function curComics (state, action) {
         switch (action.type) {
             case REQUEST_COMICS:
+                var items = [].concat(state.items);
+                if (action.offset <= 0) {
+                    items = []
+                }
                 return Object.assign({}, state, {
-                    loading: true
+                    loading: true,
+                    items: items,
+                    more: false,
+                    format: action.format
                 });
             case RECEIVE_COMICS:
                 var more = (action.offset + action.count) < action.total;
@@ -68,8 +82,8 @@ function  buildStore() {
 
     MarvelStore.actions = {};
 
-    MarvelStore.actions.getNewComics = function (offset) {
-        MarvelStore.dispatch(fetchNewComics(offset));
+    MarvelStore.actions.getComics = function (offset, format, newComics) {
+        MarvelStore.dispatch(fetchComics(offset, format, newComics));
     }
 
     return MarvelStore;
