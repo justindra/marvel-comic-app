@@ -1,0 +1,7 @@
+{
+  "name": "marvel-comic-app",
+  "short_name": "marvel-comic-app",
+  "description": "PWA to view Marvel Comics",
+  "start_url": "/",
+  "display": "standalone"
+}

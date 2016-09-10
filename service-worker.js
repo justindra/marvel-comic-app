@@ -29,7 +29,7 @@
 
 
 /* eslint-disable quotes, comma-spacing */
-var PrecacheConfig = [["/index.html","4ab3ec2b3ac7a44638f9d7f320ac556c"]];
+var PrecacheConfig = [["/index.html","937a671b3fa01f595d44914012e55e48"],["/src/main-app.html","31fdc0b141f06fb720a7f1b8c45779d7"],["/src/my-characters.html","ae44948d874641dc3d7e9df183abd256"],["/src/my-comics.html","83b5d602c5c81e95ea7ccd8a2b58e3d4"],["/src/my-home.html","94e25ce757237652af964a355726afb8"],["/src/my-series.html","0b1fd1dbab8fb5fc591ce1132f02827b"],["/src/my-view404.html","a10858b0e34d84f9b7b87d13e30bd4c8"]];
 /* eslint-enable quotes, comma-spacing */
 var CacheNamePrefix = 'sw-precache-v1--' + (self.registration ? self.registration.scope : '') + '-';
 
