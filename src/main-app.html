@@ -93,7 +93,7 @@
             fallback-selection="view404"
             role="main">
           <my-home name="home"></my-home>
-          <my-comics name="comics" posts="[[posts]]"></my-comics>
+          <my-comics name="comics"></my-comics>
           <my-characters name="characters"></my-characters>
           <my-series name="series"></my-series>
           <my-view404 name="view404"></my-view404>
@@ -132,6 +132,12 @@
             break;
           case 'comics':
             MarvelStore.actions.getComics();
+            break;
+          case 'series':
+            MarvelStore.actions.getSeries();
+            break;
+          case 'characters':
+            MarvelStore.actions.getCharacters();
             break;
         }
       },

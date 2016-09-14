@@ -4,7 +4,7 @@
 
 <link rel="import" href="./loader.html">
 
-<dom-module id="my-comic-list">
+<dom-module id="my-series-list">
   <template>
     <style>
       :host {
@@ -48,36 +48,34 @@
 
     
     <div class="comic-list-container">
-      <template is="dom-repeat" items="{{comics.items}}">
-        <a href="/comics/{{item.id}}">
-          <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
-            <div class="card-content">{{item.title}}</div>
-          </paper-card>
-        </a>
+      <template is="dom-repeat" items="{{series.items}}">
+        <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
+          <div class="card-content">{{item.title}}</div>
+        </paper-card>
       </template>
     </div>
-    <template is="dom-if" if="{{comics.loading}}">
+    <template is="dom-if" if="{{series.loading}}">
       <my-loader></my-loader>
     </template>
     <div class="button">
-      <template is="dom-if" if="{{comics.more}}">
-        <paper-button on-tap="getMoreComics" raised>LOAD MORE</paper-button>
+      <template is="dom-if" if="{{series.more}}">
+        <paper-button on-tap="getMoreseries" raised>LOAD MORE</paper-button>
       </template>
     </div>
   </template>
 
   <script>
     Polymer({
-      is: 'my-comic-list',
+      is: 'my-series-list',
       behaviors: [ ReduxBehavior ],
       properties: {
-        comics: {
+        series: {
           type: Object,
-          statePath: 'curComics'
+          statePath: 'curSeries'
         }
       },
-      getMoreComics: function () {
-        MarvelStore.actions.getComics(this.comics.count, this.comics.format, this.comics.newComics);
+      getMoreseries: function () {
+        MarvelStore.actions.getseries(this.series.count, this.series.format, this.series.newComics);
       }
     });
   </script>

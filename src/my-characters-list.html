@@ -4,7 +4,7 @@
 
 <link rel="import" href="./loader.html">
 
-<dom-module id="my-comic-list">
+<dom-module id="my-characters-list">
   <template>
     <style>
       :host {
@@ -12,7 +12,7 @@
 
         padding: 1em;
         --paper-card-header-image: {
-          height: 460px;
+          height: 300px;
         }
       }
 
@@ -48,36 +48,34 @@
 
     
     <div class="comic-list-container">
-      <template is="dom-repeat" items="{{comics.items}}">
-        <a href="/comics/{{item.id}}">
-          <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
-            <div class="card-content">{{item.title}}</div>
-          </paper-card>
-        </a>
+      <template is="dom-repeat" items="{{characters.items}}">
+        <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.name}}">
+          <div class="card-content">{{item.name}}</div>
+        </paper-card>
       </template>
     </div>
-    <template is="dom-if" if="{{comics.loading}}">
+    <template is="dom-if" if="{{characters.loading}}">
       <my-loader></my-loader>
     </template>
     <div class="button">
-      <template is="dom-if" if="{{comics.more}}">
-        <paper-button on-tap="getMoreComics" raised>LOAD MORE</paper-button>
+      <template is="dom-if" if="{{characters.more}}">
+        <paper-button on-tap="getMoreCharacters" raised>LOAD MORE</paper-button>
       </template>
     </div>
   </template>
 
   <script>
     Polymer({
-      is: 'my-comic-list',
+      is: 'my-characters-list',
       behaviors: [ ReduxBehavior ],
       properties: {
-        comics: {
+        characters: {
           type: Object,
-          statePath: 'curComics'
+          statePath: 'curCharacters'
         }
       },
-      getMoreComics: function () {
-        MarvelStore.actions.getComics(this.comics.count, this.comics.format, this.comics.newComics);
+      getMoreCharacters: function () {
+        MarvelStore.actions.getCharacters(this.characters.count, this.characters.format, this.characters.newComics);
       }
     });
   </script>
