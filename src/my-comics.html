@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
 
 <link rel="import" href="./my-comic-list.html">
 
@@ -13,28 +14,70 @@
       }
     </style>
 
+    <app-route
+        route="[[route]]"
+        pattern="/:comicId"
+        data="{{routeData}}"></app-route>
     
-    <h2>Filter the comics</h2>
-    <label id="ComicFormat">Format:</label>
-    <paper-radio-group aria-labelledby="ComicFormat" on-change="setFormat">
-      <paper-radio-button name="comic">comic</paper-radio-button>
-      <paper-radio-button name="magazine">magazine</paper-radio-button>
-      <paper-radio-button name="trade paperback">trade paperback</paper-radio-button>
-      <paper-radio-button name="hardcover">hardcover</paper-radio-button>
-      <paper-radio-button name="digest">digest</paper-radio-button>
-      <paper-radio-button name="graphic novel">graphic novel</paper-radio-button>
-      <paper-radio-button name="digital comic">digital comic</paper-radio-button>
-      <paper-radio-button name="infinite comic">infinite comic</paper-radio-button>
-    </paper-radio-group>
+    <template is="dom-if" if="[[display]]">
+      <p>comic: [[routeData.comic]]</p>
+    </template>
+    <template is="dom-if" if="[[!display]]">
+      <h2>Filter the comics</h2>
+      <label id="ComicFormat">Format:</label>
+      <paper-radio-group aria-labelledby="ComicFormat" on-change="setFormat">
+        <paper-radio-button name="comic">comic</paper-radio-button>
+        <paper-radio-button name="magazine">magazine</paper-radio-button>
+        <paper-radio-button name="trade paperback">trade paperback</paper-radio-button>
+        <paper-radio-button name="hardcover">hardcover</paper-radio-button>
+        <paper-radio-button name="digest">digest</paper-radio-button>
+        <paper-radio-button name="graphic novel">graphic novel</paper-radio-button>
+        <paper-radio-button name="digital comic">digital comic</paper-radio-button>
+        <paper-radio-button name="infinite comic">infinite comic</paper-radio-button>
+      </paper-radio-group>
 
-    <my-comic-list></my-comic-list>
+      <my-comic-list></my-comic-list>
+      
+    </template>
   </template>
 
   <script>
     Polymer({
       is: 'my-comics',
+      properties: {
+        route: Object,
+        routeData: Object,
+        comics: {
+          type: Object,
+          statePath: 'curComics'
+        },
+        comic: {
+          type: Object,
+          statePath: 'comic'
+        },
+        display: {
+          type: Boolean,
+          value: false
+        }
+      },
+      observers: [
+        '_comicIdChanged(routeData, route)'
+      ],
       setFormat: function (e) {
         MarvelStore.actions.getComics(0, e.target.name);
+      },
+      _comicIdChanged: function (routeData, route) {
+        var comicId = routeData.comicId;
+        if (comicId && (comicId !== '') && route.path) {
+          console.log(comicId);
+          this.display = true;
+          // Subscribe to comic book and set display to be comic not list
+
+        } else {
+          // Set display to be list
+          this.display = false;
+          console.log('No comic selected');
+        }
       }
     });
   </script>

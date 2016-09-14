@@ -46,21 +46,20 @@
 
     </style>
 
-    
     <div class="comic-list-container">
-      <template is="dom-repeat" items="{{comics.items}}">
-        <a href="/comics/{{item.id}}">
-          <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.title}}">
-            <div class="card-content">{{item.title}}</div>
+      <template is="dom-repeat" items="[[comics.items]]">
+        <a href="/comics/[[item.id]]">
+          <paper-card image="[[item.thumbnail.path]].[[item.thumbnail.extension]]" alt="[[item.title]]">
+            <div class="card-content">[[item.title]]</div>
           </paper-card>
         </a>
       </template>
     </div>
-    <template is="dom-if" if="{{comics.loading}}">
+    <template is="dom-if" if="[[comics.loading]]">
       <my-loader></my-loader>
     </template>
     <div class="button">
-      <template is="dom-if" if="{{comics.more}}">
+      <template is="dom-if" if="[[comics.more]]">
         <paper-button on-tap="getMoreComics" raised>LOAD MORE</paper-button>
       </template>
     </div>
