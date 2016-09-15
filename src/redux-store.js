@@ -3,6 +3,98 @@ function  buildStore() {
 
     var API_KEY = 'bb7b0d40bc2bdfbb870e9955e97c381a';
 
+    var REQUEST_COMIC = 'REQUEST_COMIC';
+    var RECEIVE_COMIC = 'RECEIVE_COMIC';
+    var REQUEST_COMIC_CHARACTERS = 'REQUEST_COMIC_CHARACTERS';
+    var RECEIVE_COMIC_CHARACTERS = 'RECEIVE_COMIC_CHARACTERS';
+
+    function requestComic (comicId) {
+        return {
+            type: REQUEST_COMIC,
+            comicId: comicId
+        };
+    }
+
+    function receiveComic (json) {
+        return {
+            type: RECEIVE_COMIC,
+            data: json.data.results[0]
+        };
+    }
+
+    function requestComicCharacters (comicId) {
+        return {
+            type: REQUEST_COMIC_CHARACTERS,
+            comicId: comicId
+        };
+    }
+
+    function receiveComicCharacters (json) {
+        return {
+            type: RECEIVE_COMIC_CHARACTERS,
+            data: json.data.results
+        };
+    }
+    
+    function fetchComic(comicId) {
+      return function (dispatch) {
+        dispatch(requestComic(comicId));
+        return fetch(`http://gateway.marvel.com:80/v1/public/comics/` + comicId + `?` +
+            `&apikey=` + API_KEY)
+          .then(function (response) { return response.json(); })
+          .then(function (json) { return dispatch(receiveComic(json)); })
+          .then(function (action) {
+            dispatch(requestComicCharacters(action.data.id));
+            return fetch(`http://gateway.marvel.com:80/v1/public/comics/` + action.data.id + `/characters?` +
+            `&apikey=` + API_KEY)
+              .then(function (response) { return response.json(); })
+              .then(function (json) { return dispatch(receiveComicCharacters(json)); });
+          });
+      };
+    }
+
+    function curComic (state, action) {
+        switch (action.type) {
+            case REQUEST_COMIC:
+                var series = [].concat(state.series);
+                var characters = [].concat(state.characters);
+                return Object.assign({}, state, {
+                    id: action.comicId,
+                    loading: true,
+                    series: series,
+                    characters: characters
+                });
+            case RECEIVE_COMIC:
+                var items = action.data
+                if (action.offset > 0) {
+                    items = [].concat(state.items, action.data);
+                }
+                return Object.assign({}, state, {
+                    loading: false,
+                    comicId: action.data.id,
+                    title: action.data.title,
+                    issueNumber: action.data.issueNumber,
+                    description: action.data.description,
+                    series: action.data.series.name,
+                    thumbnail: action.data.thumbnail,
+                    characters: action.data.characters.items,
+                    charactersExists: (action.data.characters.available > 0),
+                    charactersLoading: false
+                });
+            case REQUEST_COMIC_CHARACTERS:
+                return Object.assign({}, state, {
+                    charactersLoading: true
+                });
+            case RECEIVE_COMIC_CHARACTERS:
+                return Object.assign({}, state, {
+                    charactersLoading: false,
+                    characters: action.data
+                });
+            default:
+                return state || { loading: false };
+        }
+    }
+
     var REQUEST_COMICS = 'REQUEST_COMICS';
     var RECEIVE_COMICS = 'RECEIVE_COMICS';
 
@@ -49,7 +141,9 @@ function  buildStore() {
                     loading: true,
                     items: items,
                     more: false,
-                    format: action.format
+                    format: action.format,
+                    offset: action.offset,
+                    new: action.newComics
                 });
             case RECEIVE_COMICS:
                 var more = (action.offset + action.count) < action.total;
@@ -61,7 +155,8 @@ function  buildStore() {
                     loading: false,
                     items: items,
                     more: more,
-                    count: (action.offset + action.count)
+                    count: (action.offset + action.count),
+                    offset: action.offset
                 });
             default:
                 return state || { loading: false, items: [] };
@@ -198,6 +293,7 @@ function  buildStore() {
         }
     }
     var rootReducer = Redux.combineReducers({
+        curComic: curComic,
         curComics: curComics,
         curSeries: curSeries,
         curCharacters: curCharacters
@@ -213,8 +309,15 @@ function  buildStore() {
 
     MarvelStore.actions = {};
 
+    MarvelStore.actions.getComic = function (comicId) {
+        MarvelStore.dispatch(fetchComic(comicId));
+    }
+
     MarvelStore.actions.getComics = function (offset, format, newComics) {
-        MarvelStore.dispatch(fetchComics(offset, format, newComics));
+        var cur = MarvelStore.getState().curComics;
+        if ((offset && (cur.offset != offset) || true) || (format && (cur.format != format)) || (newComics && (cur.new != newComics) || true)) {
+            MarvelStore.dispatch(fetchComics(offset, format, newComics));
+        }
     }
 
     MarvelStore.actions.getSeries = function (offset, format, newSeries) {

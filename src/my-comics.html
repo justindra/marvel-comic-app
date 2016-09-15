@@ -4,6 +4,7 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 
 <link rel="import" href="./my-comic-list.html">
+<link rel="import" href="./my-comic.html">
 
 <dom-module id="my-comics">
   <template>
@@ -20,7 +21,7 @@
         data="{{routeData}}"></app-route>
     
     <template is="dom-if" if="[[display]]">
-      <p>comic: [[routeData.comic]]</p>
+      <my-comic></my-comic>
     </template>
     <template is="dom-if" if="[[!display]]">
       <h2>Filter the comics</h2>
@@ -69,10 +70,9 @@
       _comicIdChanged: function (routeData, route) {
         var comicId = routeData.comicId;
         if (comicId && (comicId !== '') && route.path) {
-          console.log(comicId);
-          this.display = true;
           // Subscribe to comic book and set display to be comic not list
-
+          MarvelStore.actions.getComic(comicId);
+          this.display = true;
         } else {
           // Set display to be list
           this.display = false;
