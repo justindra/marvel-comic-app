@@ -32,7 +32,7 @@ function  buildStore() {
     function receiveComicCharacters (json) {
         return {
             type: RECEIVE_COMIC_CHARACTERS,
-            data: json.data.results
+            data: json.data && json.data.results
         };
     }
     
@@ -40,15 +40,24 @@ function  buildStore() {
       return function (dispatch) {
         dispatch(requestComic(comicId));
         return fetch(`http://gateway.marvel.com:80/v1/public/comics/` + comicId + `?` +
-            `&apikey=` + API_KEY)
-          .then(function (response) { return response.json(); })
+            `apikey=` + API_KEY)
+          .then(function (response) {
+            if (response.status === 200) return response.json();
+            else throw new Error(response.status);
+          })
           .then(function (json) { return dispatch(receiveComic(json)); })
           .then(function (action) {
-            dispatch(requestComicCharacters(action.data.id));
-            return fetch(`http://gateway.marvel.com:80/v1/public/comics/` + action.data.id + `/characters?` +
-            `&apikey=` + API_KEY)
-              .then(function (response) { return response.json(); })
+            dispatch(requestComicCharacters(comicId));
+            return fetch(`http://gateway.marvel.com:80/v1/public/comics/` + comicId + `/characters?` +
+            `apikey=` + API_KEY)
+              .then(function (response) {
+                if (response.status === 200) return response.json();
+                else throw new Error(response.status);
+              })
               .then(function (json) { return dispatch(receiveComicCharacters(json)); });
+          })
+          .catch(function (error) {
+            console.log(error);
           });
       };
     }
@@ -65,10 +74,6 @@ function  buildStore() {
                     characters: characters
                 });
             case RECEIVE_COMIC:
-                var items = action.data
-                if (action.offset > 0) {
-                    items = [].concat(state.items, action.data);
-                }
                 return Object.assign({}, state, {
                     loading: false,
                     comicId: action.data.id,
@@ -98,12 +103,13 @@ function  buildStore() {
     var REQUEST_COMICS = 'REQUEST_COMICS';
     var RECEIVE_COMICS = 'RECEIVE_COMICS';
 
-    function requestComics (offset, format, newComics) {
+    function requestComics (details) {
         return {
             type: REQUEST_COMICS,
-            offset: offset || 0,
-            format: format || '',
-            newComics: newComics || false
+            offset: details.offset || 0,
+            format: details.format || '',
+            newComics: details.newComics || false,
+            titleStartsWith: details.titleStartsWith || undefined
         };
     }
 
@@ -117,13 +123,14 @@ function  buildStore() {
         };
     }
     
-    function fetchComics(offset, format, newComics) {
+    function fetchComics(details) {
       return function (dispatch) {
-        dispatch(requestComics(offset, format, newComics));
+        dispatch(requestComics(details));
         return fetch(`http://gateway.marvel.com:80/v1/public/comics?` +
-            (format && (`format=` + (format || '')) || '') +
-            `&offset=` + (offset || 0) + 
-            (newComics && `&dateDescriptor=thisMonth` || '') +
+            (details.format && (`format=` + (details.format || '')) || '') +
+            `&offset=` + (details.offset || 0) + 
+            (details.newComics && `&dateDescriptor=thisMonth` || '') +
+            (details.titleStartsWith && `&titleStartsWith=` + details.titleStartsWith || '') +
             `&apikey=` + API_KEY)
           .then(function (response) { return response.json(); })
           .then(function (json) { return dispatch(receiveComics(json)); });
@@ -143,7 +150,8 @@ function  buildStore() {
                     more: false,
                     format: action.format,
                     offset: action.offset,
-                    new: action.newComics
+                    newComics: action.newComics,
+                    titleStartsWith: action.titleStartsWith
                 });
             case RECEIVE_COMICS:
                 var more = (action.offset + action.count) < action.total;
@@ -265,15 +273,24 @@ function  buildStore() {
       return function (dispatch) {
         dispatch(requestCharacter(characterId));
         return fetch(`http://gateway.marvel.com:80/v1/public/characters/` + characterId + `?` +
-            `&apikey=` + API_KEY)
-          .then(function (response) { return response.json(); })
+            `apikey=` + API_KEY)
+          .then(function (response) {
+            if (response.status === 200) return response.json();
+            else throw new Error(response.statusText);
+          })
           .then(function (json) { return dispatch(receiveCharacter(json)); })
           .then(function (action) {
             dispatch(requestCharacterComics(action.data.id));
             return fetch(`http://gateway.marvel.com:80/v1/public/characters/` + action.data.id + `/comics?` +
-            `&apikey=` + API_KEY)
-              .then(function (response) { return response.json(); })
+            `apikey=` + API_KEY)
+              .then(function (response) {
+                if (response.status === 200) return response.json();
+                else throw new Error(response.statusText); 
+              })
               .then(function (json) { return dispatch(receiveCharacterComics(json)); });
+          })
+          .catch(function(error) {
+            console.log(error);
           });
       };
     }
@@ -363,7 +380,9 @@ function  buildStore() {
                     loading: true,
                     items: items,
                     more: false,
-                    format: action.format
+                    format: action.format,
+                    newCharacters: action.newCharacters,
+                    nameStartsWith: action.nameStartsWith
                 });
             case RECEIVE_CHARACTERS:
                 var more = (action.offset + action.count) < action.total;
@@ -403,12 +422,12 @@ function  buildStore() {
         MarvelStore.dispatch(fetchComic(comicId));
     }
 
-    MarvelStore.actions.getComics = function (offset, format, newComics) {
+    MarvelStore.actions.getComics = function (details) {
         var cur = MarvelStore.getState().curComics;
-        if ((offset && (cur.offset != offset) || true) ||
-            (format && (cur.format != format)) ||
-            (newComics && (cur.new != newComics) || true)) {
-            MarvelStore.dispatch(fetchComics(offset, format, newComics));
+        if ((details.offset && (cur.offset != details.offset) || true) ||
+            (details.format && (cur.format != details.format)) ||
+            (details.newComics && (cur.new != details.newComics) || true)) {
+            MarvelStore.dispatch(fetchComics(details));
         }
     }
 

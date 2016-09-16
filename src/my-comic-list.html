@@ -76,7 +76,12 @@
         }
       },
       getMoreComics: function () {
-        MarvelStore.actions.getComics(this.comics.count, this.comics.format, this.comics.newComics);
+        MarvelStore.actions.getComics({
+          offset: this.comics.count,
+          format: this.comics.format,
+          newComics: this.comics.newComics,
+          titleStartsWith: this.comics.titleStartsWith
+        });
       }
     });
   </script>

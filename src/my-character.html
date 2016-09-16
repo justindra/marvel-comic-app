@@ -60,7 +60,7 @@
         <h2>[[character.name]]</h2>
         <p>[[character.description]]</p>
       </div>
-      <template is="dom-if" if="[[character.comicsExists]]">
+      <template is="dom-if" if="[[!character.comicsLoading]]">
         <h2>Comics</h2>
         <div class="character-list-container">
           <template is="dom-repeat" items="[[character.comics]]">

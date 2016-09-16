@@ -83,7 +83,12 @@
         }
       },
       getMoreCharacters: function () {
-        MarvelStore.actions.getCharacters(this.characters.count, this.characters.format, this.characters.newComics);
+        MarvelStore.actions.getCharacters({
+          offset: this.characters.count,
+          format: this.characters.format,
+          newComics: this.characters.newComics,
+          nameStartsWith: this.characters.nameStartsWith
+        });
       }
     });
   </script>

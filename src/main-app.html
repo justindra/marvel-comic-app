@@ -114,31 +114,31 @@
           reflectToAttribute: true,
           observer: '_pageChanged'
         },
-        comics: {
-          type: Object,
-          statePath: 'curComics'
-        }
+        routeData: Object
       },
 
       observers: [
-        '_routePageChanged(routeData.page)'
+        '_routePageChanged(routeData.page, subroute)'
       ],
 
-      _routePageChanged: function(page) {
+      _routePageChanged: function(page, subroute) {
         this.page = page || 'home';
         switch (this.page) {
           case 'home':
-            MarvelStore.actions.getComics(0, undefined, true);
+            MarvelStore.actions.getComics({newComics: true});
             break;
           case 'comics':
-            MarvelStore.actions.getComics();
+            var cur = MarvelStore.getState().curComics;
+            if (!cur.loading && (cur.items.length == 0) && (subroute.path.length === 0)) {
+              MarvelStore.actions.getComics({});
+            }
             break;
           case 'series':
             MarvelStore.actions.getSeries();
             break;
           case 'characters':
             var cur = MarvelStore.getState().curCharacters;
-            if (!cur.loading && (cur.items.length == 0)) {
+            if (!cur.loading && (cur.items.length == 0) && (subroute.path.length === 0)) {
               MarvelStore.actions.getCharacters({});
             }
             break;

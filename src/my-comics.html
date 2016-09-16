@@ -3,6 +3,9 @@
 <link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
 <link rel="import" href="./my-comic-list.html">
 <link rel="import" href="./my-comic.html">
 
@@ -12,6 +15,22 @@
       :host {
         display: block;
         padding: 1em;
+      }
+
+      .search-box {
+        text-align: center;
+      }
+      paper-input {
+        display: inline-block;
+        width: 80%;
+      }
+      paper-button {
+        background: #f0141e;
+        color: white;
+      }
+
+      paper-button:hover {
+        background: #d41018;
       }
     </style>
 
@@ -25,6 +44,10 @@
     </template>
     <template is="dom-if" if="[[!display]]">
       <h2>Filter the comics</h2>
+      <div class="search-box">
+        <paper-input value="{{search}}" label="Input comic name"></paper-input>
+        <paper-button on-tap="searchComics" raised>Search</paper-button>
+      </div>
       <label id="ComicFormat">Format:</label>
       <paper-radio-group aria-labelledby="ComicFormat" on-change="setFormat">
         <paper-radio-button name="comic">comic</paper-radio-button>
@@ -51,6 +74,9 @@
         display: {
           type: Boolean,
           value: false
+        },
+        search: {
+          type: String
         }
       },
       observers: [
@@ -58,6 +84,11 @@
       ],
       setFormat: function (e) {
         MarvelStore.actions.getComics(0, e.target.name);
+      },
+      searchComics: function () {
+        MarvelStore.actions.getComics({
+          titleStartsWith: this.search
+        });
       },
       _comicIdChanged: function (routeData, route) {
         var comicId = routeData.comicId;
