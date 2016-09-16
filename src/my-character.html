@@ -22,6 +22,11 @@
         margin: 15px;
       }
 
+      paper-card .card-content {
+        height: 2em;
+        overflow: hidden;
+      }
+
       .details {
         display: inline-block;
         max-width: calc(70% - 45px);
@@ -55,7 +60,7 @@
         <h2>[[character.name]]</h2>
         <p>[[character.description]]</p>
       </div>
-      <template is="dom-if" if="[[character.charactersExists]]">
+      <template is="dom-if" if="[[character.comicsExists]]">
         <h2>Comics</h2>
         <div class="character-list-container">
           <template is="dom-repeat" items="[[character.comics]]">

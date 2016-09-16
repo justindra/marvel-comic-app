@@ -318,12 +318,13 @@ function  buildStore() {
     var REQUEST_CHARACTERS = 'REQUEST_CHARACTERS';
     var RECEIVE_CHARACTERS = 'RECEIVE_CHARACTERS';
 
-    function requestCharacters (offset, format, newCharacters) {
+    function requestCharacters (details) {
         return {
             type: REQUEST_CHARACTERS,
-            offset: offset || 0,
-            format: format || '',
-            newCharacters: newCharacters || false
+            offset: details.offset || 0,
+            format: details.format || '',
+            newCharacters: details.newCharacters || false,
+            nameStartsWith: details.nameStartsWith || undefined
         };
     }
 
@@ -337,13 +338,14 @@ function  buildStore() {
         };
     }
     
-    function fetchCharacters(offset, format, newCharacters) {
+    function fetchCharacters(details) {
       return function (dispatch) {
-        dispatch(requestCharacters(offset, format, newCharacters));
+        dispatch(requestCharacters(details));
         return fetch(`http://gateway.marvel.com:80/v1/public/characters?` +
-            (format && (`format=` + (format || '')) || '') +
-            `&offset=` + (offset || 0) + 
-            (newCharacters && `&dateDescriptor=thisMonth` || '') +
+            (details.format && (`format=` + (details.format || '')) || '') +
+            `&offset=` + (details.offset || 0) + 
+            (details.newCharacters && `&dateDescriptor=thisMonth` || '') +
+            (details.nameStartsWith && `&nameStartsWith=` + details.nameStartsWith || '') +
             `&apikey=` + API_KEY)
           .then(function (response) { return response.json(); })
           .then(function (json) { return dispatch(receiveCharacters(json)); });
@@ -403,7 +405,9 @@ function  buildStore() {
 
     MarvelStore.actions.getComics = function (offset, format, newComics) {
         var cur = MarvelStore.getState().curComics;
-        if ((offset && (cur.offset != offset) || true) || (format && (cur.format != format)) || (newComics && (cur.new != newComics) || true)) {
+        if ((offset && (cur.offset != offset) || true) ||
+            (format && (cur.format != format)) ||
+            (newComics && (cur.new != newComics) || true)) {
             MarvelStore.dispatch(fetchComics(offset, format, newComics));
         }
     }
@@ -416,8 +420,8 @@ function  buildStore() {
         MarvelStore.dispatch(fetchCharacter(characterId));
     }
 
-    MarvelStore.actions.getCharacters = function (offset, format, newCharacters) {
-        MarvelStore.dispatch(fetchCharacters(offset, format, newCharacters));
+    MarvelStore.actions.getCharacters = function (details) {
+        MarvelStore.dispatch(fetchCharacters(details));
     }
 
     return MarvelStore;

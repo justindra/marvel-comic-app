@@ -137,7 +137,10 @@
             MarvelStore.actions.getSeries();
             break;
           case 'characters':
-            MarvelStore.actions.getCharacters();
+            var cur = MarvelStore.getState().curCharacters;
+            if (!cur.loading && (cur.items.length == 0)) {
+              MarvelStore.actions.getCharacters({});
+            }
             break;
         }
       },

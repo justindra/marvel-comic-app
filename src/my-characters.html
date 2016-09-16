@@ -41,8 +41,8 @@
     </template>
     <template is="dom-if" if="[[!display]]">
       <div class="search-box">
-        <paper-input label="Input character name"></paper-input>
-        <paper-button raised>Search</paper-button>
+        <paper-input value="{{search}}" label="Input character name"></paper-input>
+        <paper-button on-tap="searchCharacter" raised>Search</paper-button>
       </div>
       <my-characters-list></my-characters-list>
     </template>
@@ -57,6 +57,9 @@
         display: {
           type: Boolean,
           value: false
+        },
+        search: {
+          type: String
         }
       },
       observers: [
@@ -72,6 +75,11 @@
           // Set display to be list
           this.display = false;
         }
+      },
+      searchCharacter: function () {
+        MarvelStore.actions.getCharacters({
+          nameStartsWith: this.search
+        });
       }
     });
   </script>
