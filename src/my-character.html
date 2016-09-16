@@ -1,0 +1,89 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="./loader.html">
+
+<dom-module id="my-character">
+  <template>
+    <style>
+      :host {
+        display: block;
+
+        padding: 1em;
+        --paper-card-header-image: {
+          max-height: 460px;
+        }
+      }
+
+      paper-card {
+        width: 300px;
+        max-width: 30%;
+        margin: 15px;
+      }
+
+      .details {
+        display: inline-block;
+        max-width: calc(70% - 45px);
+        vertical-align: top;
+        text-align: left;
+      }
+
+      .character-list-container {
+        text-align: center;
+      }
+
+      @media only screen and (max-width: 768px) {
+        paper-card {
+          width: 300px;
+          max-width: 100%;
+          margin: auto;
+          display: block;
+        }
+        .details {
+          display: block;
+          max-width: none;
+          text-align: center;
+        }
+      }
+
+    </style>
+
+    <template is="dom-if" if="[[!character.loading]]">
+      <paper-card image="[[character.thumbnail.path]].[[character.thumbnail.extension]]" alt="[[character.name]]"></paper-card>
+      <div class="details">
+        <h2>[[character.name]]</h2>
+        <p>[[character.description]]</p>
+      </div>
+      <template is="dom-if" if="[[character.charactersExists]]">
+        <h2>Comics</h2>
+        <div class="character-list-container">
+          <template is="dom-repeat" items="[[character.comics]]">
+            <a href="/comics/[[item.id]]">
+              <paper-card image="[[item.thumbnail.path]].[[item.thumbnail.extension]]" alt="[[item.title]]">
+                <div class="card-content">[[item.title]]</div>
+              </paper-card>
+            </a>
+          </template>
+        </div>
+      </template>
+    </template>
+
+    <template is="dom-if" if="[[character.loading]]">
+      <my-loader></my-loader>
+    </template>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'my-character',
+      behaviors: [ ReduxBehavior ],
+      properties: {
+        character: {
+          type: Object,
+          statePath: 'curCharacter'
+        }
+      }
+    });
+  </script>
+</dom-module>

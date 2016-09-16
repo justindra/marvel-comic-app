@@ -44,21 +44,29 @@
         background: #d41018;
       }
 
+      @media only screen and (max-width: 768px) {
+        paper-card {
+          margin: 0;
+        }
+      }
+
     </style>
 
     
     <div class="comic-list-container">
-      <template is="dom-repeat" items="{{characters.items}}">
-        <paper-card image="{{item.thumbnail.path}}.{{item.thumbnail.extension}}" alt="{{item.name}}">
-          <div class="card-content">{{item.name}}</div>
-        </paper-card>
+      <template is="dom-repeat" items="[[characters.items]]">
+        <a href="/characters/[[item.id]]">
+          <paper-card image="[[item.thumbnail.path]].[[item.thumbnail.extension]]" alt="[[item.name]]">
+            <div class="card-content">[[item.name]]</div>
+          </paper-card>
+        </a>
       </template>
     </div>
-    <template is="dom-if" if="{{characters.loading}}">
+    <template is="dom-if" if="[[characters.loading]]">
       <my-loader></my-loader>
     </template>
     <div class="button">
-      <template is="dom-if" if="{{characters.more}}">
+      <template is="dom-if" if="[[characters.more]]">
         <paper-button on-tap="getMoreCharacters" raised>LOAD MORE</paper-button>
       </template>
     </div>

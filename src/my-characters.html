@@ -1,5 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
 <link rel="import" href="./my-characters-list.html">
+<link rel="import" href="./my-character.html">
 
 <dom-module id="my-characters">
   <template>
@@ -9,18 +13,66 @@
 
         padding: 1em;
       }
+
+      .search-box {
+        text-align: center;
+      }
+      paper-input {
+        display: inline-block;
+        width: 80%;
+      }
+      paper-button {
+        background: #f0141e;
+        color: white;
+      }
+
+      paper-button:hover {
+        background: #d41018;
+      }
     </style>
 
+    <app-route
+        route="[[route]]"
+        pattern="/:characterId"
+        data="{{routeData}}"></app-route>
     
-    <h2>Some inputs for filtering??</h2>
-
-    <p>List of characters here</p>
-    <my-characters-list></my-characters-list>
+    <template is="dom-if" if="[[display]]">
+      <my-character></my-character>
+    </template>
+    <template is="dom-if" if="[[!display]]">
+      <div class="search-box">
+        <paper-input label="Input character name"></paper-input>
+        <paper-button raised>Search</paper-button>
+      </div>
+      <my-characters-list></my-characters-list>
+    </template>
   </template>
 
   <script>
     Polymer({
-      is: 'my-characters'
+      is: 'my-characters',
+      properties: {
+        route: Object,
+        routeData: Object,
+        display: {
+          type: Boolean,
+          value: false
+        }
+      },
+      observers: [
+        '_characterIdChanged(routeData, route)'
+      ],
+      _characterIdChanged: function (routeData, route) {
+        var characterId = routeData.characterId;
+        if (characterId && (characterId !== '') && route.path) {
+          // Subscribe to character and set display to be character not list
+          MarvelStore.actions.getCharacter(characterId);
+          this.display = true;
+        } else {
+          // Set display to be list
+          this.display = false;
+        }
+      }
     });
   </script>
 </dom-module>

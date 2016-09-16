@@ -18,7 +18,7 @@ function  buildStore() {
     function receiveComic (json) {
         return {
             type: RECEIVE_COMIC,
-            data: json.data.results[0]
+            data: json.data && json.data.results && json.data.results[0] || {}
         };
     }
 
@@ -228,6 +228,93 @@ function  buildStore() {
         }
     }
 
+    var REQUEST_CHARACTER = 'REQUEST_CHARACTER';
+    var RECEIVE_CHARACTER = 'RECEIVE_CHARACTER';
+    var REQUEST_CHARACTER_COMICS = 'REQUEST_CHARACTER_COMICS';
+    var RECEIVE_CHARACTER_COMICS = 'RECEIVE_CHARACTER_COMICS';
+
+    function requestCharacter (characterId) {
+        return {
+            type: REQUEST_CHARACTER,
+            characterId: characterId
+        };
+    }
+
+    function receiveCharacter (json) {
+        return {
+            type: RECEIVE_CHARACTER,
+            data: json.data && json.data.results && json.data.results[0] || {}
+        };
+    }
+
+    function requestCharacterComics (characterId) {
+        return {
+            type: REQUEST_CHARACTER_COMICS,
+            characterId: characterId
+        };
+    }
+
+    function receiveCharacterComics (json) {
+        return {
+            type: RECEIVE_CHARACTER_COMICS,
+            data: json.data.results
+        };
+    }
+    
+    function fetchCharacter(characterId) {
+      return function (dispatch) {
+        dispatch(requestCharacter(characterId));
+        return fetch(`http://gateway.marvel.com:80/v1/public/characters/` + characterId + `?` +
+            `&apikey=` + API_KEY)
+          .then(function (response) { return response.json(); })
+          .then(function (json) { return dispatch(receiveCharacter(json)); })
+          .then(function (action) {
+            dispatch(requestCharacterComics(action.data.id));
+            return fetch(`http://gateway.marvel.com:80/v1/public/characters/` + action.data.id + `/comics?` +
+            `&apikey=` + API_KEY)
+              .then(function (response) { return response.json(); })
+              .then(function (json) { return dispatch(receiveCharacterComics(json)); });
+          });
+      };
+    }
+
+    function curCharacter (state, action) {
+        switch (action.type) {
+            case REQUEST_CHARACTER:
+                var series = [].concat(state.series);
+                var comics = [].concat(state.comics);
+                return Object.assign({}, state, {
+                    id: action.characterId,
+                    loading: true,
+                    series: series,
+                    comics: comics
+                });
+            case RECEIVE_CHARACTER:
+                return Object.assign({}, state, {
+                    loading: false,
+                    characterId: action.data.id,
+                    name: action.data.name,
+                    description: action.data.description,
+                    thumbnail: action.data.thumbnail,
+                    series: action.data.series.items,
+                    comics: action.data.comics.items,
+                    comicsExists: (action.data.comics.available > 0),
+                    comicsLoading: false
+                });
+            case REQUEST_CHARACTER_COMICS:
+                return Object.assign({}, state, {
+                    comicsLoading: true
+                });
+            case RECEIVE_CHARACTER_COMICS:
+                return Object.assign({}, state, {
+                    comicsLoading: false,
+                    comics: action.data
+                });
+            default:
+                return state || { loading: false };
+        }
+    }
+
     var REQUEST_CHARACTERS = 'REQUEST_CHARACTERS';
     var RECEIVE_CHARACTERS = 'RECEIVE_CHARACTERS';
 
@@ -296,6 +383,7 @@ function  buildStore() {
         curComic: curComic,
         curComics: curComics,
         curSeries: curSeries,
+        curCharacter: curCharacter,
         curCharacters: curCharacters
     });
 
@@ -322,6 +410,10 @@ function  buildStore() {
 
     MarvelStore.actions.getSeries = function (offset, format, newSeries) {
         MarvelStore.dispatch(fetchSeries(offset, format, newSeries));
+    }
+
+    MarvelStore.actions.getCharacter = function (characterId) {
+        MarvelStore.dispatch(fetchCharacter(characterId));
     }
 
     MarvelStore.actions.getCharacters = function (offset, format, newCharacters) {
